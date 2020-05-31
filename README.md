@@ -1,2 +1,2 @@
-# reflexometer
-Arduino-based device to measure human reaction speed
+# Reflexometer
+Arduino-based device to measure human reaction time.
