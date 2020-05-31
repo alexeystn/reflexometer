@@ -2,19 +2,19 @@
 #include <Fonts/FreeSans9pt7b.h>
 #include <Fonts/FreeSans12pt7b.h>
 
+// Configurable parameters: LEDs and buttons pins
+
 #define LED_A 9
 #define LED_B 11
 
-#define BUTTON_A 8
-#define BUTTON_B 10
-#define BUTTON_C 12
+#define BUTTON_A 8   //   Up /  Plus / Option A
+#define BUTTON_B 10  // Down / Minus / Option B
+#define BUTTON_C 12  //  OK  / Start / Exit (long press)
 
-#define ANSWER_A 0
-#define ANSWER_B 1
+Adafruit_SSD1306 display(128, 64, &Wire, -1); // SDA–A4, SCL–A5 for Pro Mini
 
-#define ANSWER_EMPTY 0
-#define ANSWER_RIGHT 1
-#define ANSWER_WRONG 2
+enum option_t { OPTION_A, OPTION_B };
+enum answer_t { ANSWER_EMPTY, ANSWER_RIGHT, ANSWER_WRONG };
 
 #define REACTION_THRESHOLD 1000
 #define REACTION_WAIT_MIN  2000
@@ -47,7 +47,7 @@ typedef struct {
   program_t program;
 } menu_item_t;
 
-#define MENU_LENGTH       4
+#define MENU_LENGTH 4
 
 menu_item_t menu[MENU_LENGTH] = {
   {"Reaction", P_REACTION},
@@ -57,8 +57,6 @@ menu_item_t menu[MENU_LENGTH] = {
 };
 
 program_t currentProgram;
-
-Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
 
 void setup(void) {
@@ -77,7 +75,6 @@ void setup(void) {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.setTextColor(SSD1306_WHITE);
   display.display();
-
 }
 
 
@@ -232,7 +229,7 @@ uint8_t runDurationTestCycle(uint16_t duration) {
         currentPhase ^= 1;
       }
       if (isButtonPressed(BUTTON_A)) {
-        if (rightAnswer == ANSWER_A) {
+        if (rightAnswer == OPTION_A) {
           isAnswerCorrect = true;
         } else {
           isAnswerCorrect = false;
@@ -240,7 +237,7 @@ uint8_t runDurationTestCycle(uint16_t duration) {
         exitFlag = 1;
       }
       if (isButtonPressed(BUTTON_B)) {
-        if (rightAnswer == ANSWER_B) {
+        if (rightAnswer == OPTION_B) {
           isAnswerCorrect = true;
         } else {
           isAnswerCorrect = false;
@@ -283,7 +280,7 @@ uint8_t runDurationTestCycle(uint16_t duration) {
 
 void firstPhaseAction(uint16_t duration, uint8_t rightAnswer) {
   if (currentProgram == P_TIME_SHIFT) {
-    if (rightAnswer == ANSWER_A) {
+    if (rightAnswer == OPTION_A) {
       LED_A_ON; 
       DELAY; 
       LED_B_ON;
@@ -293,14 +290,14 @@ void firstPhaseAction(uint16_t duration, uint8_t rightAnswer) {
       LED_A_ON;
     }
   } else if (currentProgram == P_ON_TIME) {
-    if (rightAnswer == ANSWER_A) duration *= 2; 
+    if (rightAnswer == OPTION_A) duration *= 2; 
     {  
       LED_A_ON;
       DELAY;
       LED_A_OFF;
     }
   } else if (currentProgram == P_OFF_TIME) {
-    if (rightAnswer == ANSWER_A) duration *= 2; 
+    if (rightAnswer == OPTION_A) duration *= 2; 
     {  
       LED_A_OFF;
       DELAY;
@@ -312,7 +309,7 @@ void firstPhaseAction(uint16_t duration, uint8_t rightAnswer) {
 
 void secondPhaseAction(uint16_t duration, uint8_t rightAnswer) {
   if (currentProgram == P_TIME_SHIFT) {
-    if (rightAnswer == ANSWER_A) {
+    if (rightAnswer == OPTION_A) {
       LED_A_OFF;
       DELAY;
       LED_B_OFF;
@@ -322,12 +319,12 @@ void secondPhaseAction(uint16_t duration, uint8_t rightAnswer) {
       LED_A_OFF;
     }
   } else if (currentProgram == P_ON_TIME) {
-    if (rightAnswer == ANSWER_B) duration *= 2;
+    if (rightAnswer == OPTION_B) duration *= 2;
     LED_B_ON;
     DELAY;
     LED_B_OFF;
   } else if (currentProgram == P_OFF_TIME) {
-    if (rightAnswer == ANSWER_B) duration *= 2;
+    if (rightAnswer == OPTION_B) duration *= 2;
     LED_B_OFF; 
     DELAY;
     LED_B_ON;
